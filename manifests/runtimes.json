@@ -1,0 +1,85 @@
+{
+  "thor": {
+    "name": "sophon-realtime-4b-thor-0.1.0.tar.gz",
+    "image": "local/sophon-realtime-4b-thor:0.1.0",
+    "imageId": "sha256:0a27d5b1510f151d66a830b301382a57939ad6cc9968dd024a4d35eb3cde95cf",
+    "configImageId": "sha256:9a9d2f2feebf3b6ebb3bca2faacb9a8db8f528bd64a695a00ad7890c2797f1f2",
+    "imageSizeBytes": 4437509429,
+    "size": 4417922996,
+    "sha256": "f16be8e7955d4fe6f6e4b01cc9658bdf941407be1e3b90e22b709251e21ac01c",
+    "cudaHostPath": "/usr/local/cuda/targets/sbsa-linux/lib",
+    "compatibility": {
+      "architecture": "arm64",
+      "l4tVersion": "39.2.0",
+      "jetpackVersion": "7.2"
+    },
+    "requiredMemoryBytesByModel": {
+      "4B-Flash": 25769803776
+    },
+    "profiles": {
+      "4B-Flash": {
+        "deployConfig": "/app/config/sophon_realtime_flash_4b.yaml",
+        "o1Wav": true,
+        "ompNumThreads": 4,
+        "tf32Override": true,
+        "expandableSegments": true,
+        "compileCache": true
+      }
+    },
+    "sources": {
+      "modelscope": {
+        "repository": "manateelazycat/Sophon-Realtime-4B-Flash-AIPod",
+        "revision": "bdf9dda3a3fdde915fc8fb6758bbb34712e9b382",
+        "path": "runtime/sophon-realtime-4b-thor-0.1.0.tar.gz",
+        "url": "https://modelscope.cn/models/manateelazycat/Sophon-Realtime-4B-Flash-AIPod/resolve/bdf9dda3a3fdde915fc8fb6758bbb34712e9b382/runtime/sophon-realtime-4b-thor-0.1.0.tar.gz"
+      },
+      "huggingface": {
+        "repository": "manateelazycat/Sophon-Realtime-4B-Flash-AIPod-HF",
+        "revision": "0825374bed2d1a81de0efc458d6447c4439434d5",
+        "path": "runtime/sophon-realtime-4b-thor-0.1.0.tar.gz",
+        "url": "https://huggingface.co/manateelazycat/Sophon-Realtime-4B-Flash-AIPod-HF/resolve/0825374bed2d1a81de0efc458d6447c4439434d5/runtime/sophon-realtime-4b-thor-0.1.0.tar.gz"
+      }
+    }
+  },
+  "orin": {
+    "name": "sophon-realtime-4b-orin-0.1.0.tar.gz",
+    "image": "local/sophon-realtime-4b-orin:0.1.0",
+    "imageId": "sha256:a6129be6280dfdf37240c1038e5b377faa9075aa71878fb18aaa267f5f695e79",
+    "configImageId": "sha256:3efd997a4772eb4ca7042b817676a2484f711f264b6a8d62355088b75b669034",
+    "imageSizeBytes": 13648548862,
+    "size": 4419813101,
+    "sha256": "08a59116a4c21b46cb20141c48b920f872284365946dc3e9f9432de24b6b743e",
+    "cudaHostPath": "/usr/local/cuda/targets/sbsa-linux/lib",
+    "compatibility": {
+      "architecture": "arm64",
+      "l4tVersion": "39.2.1",
+      "jetpackVersion": "7.2.1"
+    },
+    "requiredMemoryBytesByModel": {
+      "4B-Flash": 22548578304
+    },
+    "profiles": {
+      "4B-Flash": {
+        "deployConfig": "/app/config/sophon_realtime_flash_4b_orin.yaml",
+        "o1Wav": true,
+        "ompNumThreads": 2,
+        "mallocArenaMax": 2,
+        "compileCache": true
+      }
+    },
+    "sources": {
+      "modelscope": {
+        "repository": "manateelazycat/Sophon-Realtime-4B-Flash-AIPod",
+        "revision": "bdf9dda3a3fdde915fc8fb6758bbb34712e9b382",
+        "path": "runtime/sophon-realtime-4b-orin-0.1.0.tar.gz",
+        "url": "https://modelscope.cn/models/manateelazycat/Sophon-Realtime-4B-Flash-AIPod/resolve/bdf9dda3a3fdde915fc8fb6758bbb34712e9b382/runtime/sophon-realtime-4b-orin-0.1.0.tar.gz"
+      },
+      "huggingface": {
+        "repository": "manateelazycat/Sophon-Realtime-4B-Flash-AIPod-HF",
+        "revision": "0825374bed2d1a81de0efc458d6447c4439434d5",
+        "path": "runtime/sophon-realtime-4b-orin-0.1.0.tar.gz",
+        "url": "https://huggingface.co/manateelazycat/Sophon-Realtime-4B-Flash-AIPod-HF/resolve/0825374bed2d1a81de0efc458d6447c4439434d5/runtime/sophon-realtime-4b-orin-0.1.0.tar.gz"
+      }
+    }
+  }
+}

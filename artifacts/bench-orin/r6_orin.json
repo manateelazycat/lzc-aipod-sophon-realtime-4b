@@ -1,0 +1,148 @@
+{
+  "model": "/model",
+  "lang": "zh",
+  "warmup": 2,
+  "single_runs": [
+    {
+      "ok": true,
+      "ttft_s": 0.16964622199884616,
+      "ttfa_s": 1.3182191429950763,
+      "e2e_s": 4.073058863985352,
+      "audio_dur_s": 4.64,
+      "rtf": 0.8778144103416708,
+      "audio_chunks": 6,
+      "text_chars": 18,
+      "peak_amp": 0.671875,
+      "text_preview": "好，我慢慢来，你先深呼吸，我陪着你。"
+    },
+    {
+      "ok": true,
+      "ttft_s": 0.13739586601150222,
+      "ttfa_s": 0.8185310870176181,
+      "e2e_s": 3.0500346470216755,
+      "audio_dur_s": 4.08,
+      "rtf": 0.7475575115249204,
+      "audio_chunks": 5,
+      "text_chars": 19,
+      "peak_amp": 0.6171875,
+      "text_preview": "好，我慢慢来，你先深呼吸，我陪你一起。"
+    },
+    {
+      "ok": true,
+      "ttft_s": 0.13761766097741202,
+      "ttfa_s": 0.8136072819761466,
+      "e2e_s": 3.275052467972273,
+      "audio_dur_s": 4.48,
+      "rtf": 0.7310384973152394,
+      "audio_chunks": 6,
+      "text_chars": 20,
+      "peak_amp": 0.7265625,
+      "text_preview": "好，我慢慢来，你先深呼吸，咱们一步步来。"
+    },
+    {
+      "ok": true,
+      "ttft_s": 0.1375375019852072,
+      "ttfa_s": 0.82003761298256,
+      "e2e_s": 3.33771449100459,
+      "audio_dur_s": 4.48,
+      "rtf": 0.7450255560278102,
+      "audio_chunks": 6,
+      "text_chars": 20,
+      "peak_amp": 0.59375,
+      "text_preview": "好，我先深呼吸一下，你慢慢说，我听着呢。"
+    },
+    {
+      "ok": true,
+      "ttft_s": 0.13749318299232982,
+      "ttfa_s": 0.8163424899976235,
+      "e2e_s": 3.2630029149877373,
+      "audio_dur_s": 4.4,
+      "rtf": 0.7415915715881221,
+      "audio_chunks": 5,
+      "text_chars": 20,
+      "peak_amp": 0.578125,
+      "text_preview": "好，我先深呼吸一下，你慢慢说，我听着呢。"
+    }
+  ],
+  "single_summary": {
+    "ok_count": 5,
+    "total": 5,
+    "ttfa_mean_s": 0.9173,
+    "ttfa_p50_s": 0.8185,
+    "ttfa_p95_s": 1.2186,
+    "ttft_mean_s": 0.1439,
+    "e2e_mean_s": 3.3998,
+    "e2e_p50_s": 3.2751,
+    "e2e_p95_s": 3.926,
+    "audio_dur_mean_s": 4.416,
+    "rtf_mean": 0.7686,
+    "rtf_p95": 0.8518
+  },
+  "concurrency": 2,
+  "concurrent_runs": [
+    {
+      "ok": true,
+      "ttft_s": 0.2026409489917569,
+      "ttfa_s": 1.3269445369951427,
+      "e2e_s": 4.284126685000956,
+      "audio_dur_s": 4.48,
+      "rtf": 0.956278277901999,
+      "audio_chunks": 6,
+      "text_chars": 21,
+      "peak_amp": 0.69140625,
+      "text_preview": "好，我慢慢来，你先深呼吸，我陪你一起处理。"
+    },
+    {
+      "ok": true,
+      "ttft_s": 0.15042909199837595,
+      "ttfa_s": 1.2436417839780916,
+      "e2e_s": 3.978234377980698,
+      "audio_dur_s": 4.4,
+      "rtf": 0.9041441768137949,
+      "audio_chunks": 5,
+      "text_chars": 20,
+      "peak_amp": 0.5546875,
+      "text_preview": "好，我慢慢来，你先深呼吸，我们一步步来。"
+    },
+    {
+      "ok": true,
+      "ttft_s": 0.19106307098991238,
+      "ttfa_s": 0.9887348790070973,
+      "e2e_s": 4.076917465979932,
+      "audio_dur_s": 4.08,
+      "rtf": 0.9992444769558656,
+      "audio_chunks": 5,
+      "text_chars": 19,
+      "peak_amp": 0.84375,
+      "text_preview": "好的，我慢慢来，你先深呼吸，我陪着你。"
+    },
+    {
+      "ok": true,
+      "ttft_s": 0.16578924501664005,
+      "ttfa_s": 1.4390233090089168,
+      "e2e_s": 4.871992405009223,
+      "audio_dur_s": 5.68,
+      "rtf": 0.8577451417269759,
+      "audio_chunks": 6,
+      "text_chars": 24,
+      "peak_amp": 0.79296875,
+      "text_preview": "好，我慢慢来，你先深呼吸，咱们一步一步来，别急。"
+    }
+  ],
+  "concurrent_summary": {
+    "ok_count": 4,
+    "total": 4,
+    "ttfa_mean_s": 1.2496,
+    "ttfa_p50_s": 1.2853,
+    "ttfa_p95_s": 1.4222,
+    "ttft_mean_s": 0.1775,
+    "e2e_mean_s": 4.3028,
+    "e2e_p50_s": 4.1805,
+    "e2e_p95_s": 4.7838,
+    "audio_dur_mean_s": 4.66,
+    "rtf_mean": 0.9294,
+    "rtf_p95": 0.9928
+  },
+  "concurrent_wall_s": 9.1619,
+  "concurrent_audio_throughput_x": 2.0345
+}

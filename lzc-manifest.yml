@@ -1,0 +1,17 @@
+application:
+  subdomain: sophon-realtime-4b
+  multi_instance: true
+  background_task: true
+  routes:
+    - /=http://web.cloud.lazycat.aipod.sophon-realtime-4b.lzcapp:8080
+  public_path:
+    - /
+services:
+  web:
+    image: registry.lazycat.cloud/alpine@sha256:b12c7d46bc14b4260b9e42714688e2dbf5dee973b291a4c12e0e1539404d9f1d
+    command: /bin/sh /lzcapp/pkg/content/bootstrap.sh
+    environment:
+      - AIPOD_BACKEND_URL=http://host.lzcapp:40794
+      - SOPHON_REALTIME_DATA_DIR=/lzcapp/var/sophon-realtime-4b
+ext_config:
+  enable_document_access: true

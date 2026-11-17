@@ -1,0 +1,24 @@
+{
+  "schema": "model-host.source-evidence.v1",
+  "upstreamRepo": "https://github.com/adventists-ai/sophon-realtime",
+  "upstreamCommit": "2c48aa543fe6a123468933819000f368e74454f5",
+  "license": "Apache-2.0",
+  "licenseUrl": "https://github.com/adventists-ai/sophon-realtime/blob/main/LICENSE",
+  "redistributable": true,
+  "models": {
+    "Sophon-Realtime-4B-Flash": {
+      "huggingface": {
+        "repository": "adventists-ai/Sophon-Realtime-4B-Flash",
+        "revision": "ae4a8591d0ae4c3b3da0250a613828bc2435963b"
+      },
+      "modelscope": {
+        "repository": "AdventistsAI/Sophon-Realtime-4B-Flash",
+        "revision": "9240b6021dde87d65857bb00b8b404077bafcdc3"
+      },
+      "fileCount": 36,
+      "totalBytesHF": 12999734621,
+      "totalBytesMS": 12999734329,
+      "crossSourceVerified": false
+    }
+  }
+}

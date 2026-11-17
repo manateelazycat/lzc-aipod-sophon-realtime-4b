@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="aipod-subdomain" content="__AIPOD_SUBDOMAIN__">
+  <title>Sophon-Realtime</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #151a29;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    .landing {
+      width: 100%;
+      max-width: 640px;
+      padding: 24px;
+      text-align: center;
+    }
+    .landing p {
+      margin: 0 0 32px;
+      font-size: 16px;
+      line-height: 1.8;
+    }
+    .landing button {
+      padding: 11px 40px;
+      font-size: 15px;
+      color: #fff;
+      background: #456aff;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 140ms ease, transform 140ms ease;
+    }
+    .landing button:hover { background: #3659e8; }
+    .landing button:active { transform: scale(.97); }
+    .landing button:focus-visible { outline: 2px solid #456aff; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <main class="landing">
+    <p id="intro">安装 Sophon-Realtime 模型需要跳转到 AI Pod 继续安装</p>
+    <button type="button" id="continue-install">继续安装</button>
+  </main>
+  <script>
+    (function () {
+      const language = /^zh(?:-|$)/i.test(navigator.languages?.[0] || navigator.language || "en") ? "zh" : "en";
+      document.documentElement.lang = language;
+      if (language === "en") {
+        document.getElementById("intro").textContent = "To install Sophon-Realtime, continue in AI Pod.";
+        document.getElementById("continue-install").textContent = "Continue";
+        document.title = "Sophon-Realtime";
+      }
+      const box = location.hostname.split(".").slice(1).join(".");
+      const subdomain = document.querySelector('meta[name="aipod-subdomain"]').content;
+      document.getElementById("continue-install").addEventListener("click", function () {
+        window.location.assign("https://" + subdomain + "." + box + "/setting/model-store?view=deployment&package=cloud.lazycat.aipod.sophon-realtime");
+      });
+    })();
+  </script>
+</body>
+</html>

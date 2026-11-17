@@ -1,0 +1,20 @@
+package: cloud.lazycat.aipod.sophon-realtime-4b
+version: 0.1.0
+name: Sophon-Realtime-4B-Flash
+description: 全双工实时语音对话模型 Sophon-Realtime-4B-Flash（支持 AGX Thor / AGX Orin）
+author: AI Pod
+license: https://github.com/adventists-ai/sophon-realtime/blob/main/LICENSE
+locales:
+  zh:
+    name: Sophon-Realtime-4B-Flash
+    description: 全双工实时语音对话模型 Sophon-Realtime-4B-Flash（支持 AGX Thor / AGX Orin）
+  en:
+    name: Sophon-Realtime-4B-Flash
+    description: Full-duplex real-time voice dialogue model Sophon-Realtime-4B-Flash (AGX Thor / AGX Orin)
+permissions:
+  required:
+    - net.internet
+    - net.lan
+    - document.read
+    - document.write
+    - lzcapp.user_delegate

@@ -1,0 +1,74 @@
+FROM python:3.12-slim-bookworm AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    UV_DEFAULT_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple
+
+RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || true \
+    && apt-get update && apt-get install -y --no-install-recommends \
+      curl ca-certificates libsndfile1 ffmpeg git build-essential \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh
+
+ENV PATH="/root/.local/bin:${PATH}"
+
+RUN uv venv --python 3.12 /opt/venv \
+    && . /opt/venv/bin/activate \
+    && uv pip install --no-cache \
+       vllm==0.30.0 \
+       vllm-omni==0.30.0 \
+       duplexjev-vllm==0.3.0 \
+       httpx \
+       websockets
+
+COPY upstream/flash/plugin /tmp/sophon-plugin
+RUN . /opt/venv/bin/activate \
+    && uv pip install --no-cache --no-deps /tmp/sophon-plugin \
+    && rm -rf /tmp/sophon-plugin
+
+# Slim unused caches and tests from venv
+RUN find /opt/venv -type d -name "__pycache__" -exec rm -rf {} + \
+    && find /opt/venv -type d -name "tests" -exec rm -rf {} + \
+    && find /opt/venv -name "*.pyc" -delete
+
+FROM python:3.12-slim-bookworm
+
+RUN sed -i 's/deb.debian.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apt/sources.list.d/debian.sources 2>/dev/null || true \
+    && apt-get update && apt-get install -y --no-install-recommends \
+      libsndfile1 libgomp1 libxcb1 libgl1 libglib2.0-0 gcc g++ libc6-dev ninja-build \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=builder /opt/venv /opt/venv
+COPY upstream/flash/config /app/config
+COPY runtime/config/ /app/config/
+COPY upstream/LICENSE /app/UPSTREAM-LICENSE
+COPY runtime/server.py /app/server.py
+COPY runtime/token_metrics.py /app/token_metrics.py
+
+ENV PATH="/opt/venv/bin:/usr/local/cuda/bin:${PATH}" \
+    LD_LIBRARY_PATH="/opt/venv/lib/python3.12/site-packages/nvidia/cu13/lib:/usr/local/cuda/lib64:/usr/local/cuda/targets/sbsa-linux/lib" \
+    CUDA_HOME=/usr/local/cuda \
+    HF_HUB_OFFLINE=1 \
+    TRANSFORMERS_OFFLINE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app \
+    SOPHON_O1_WAV=1 \
+    VLLM_DISABLE_COMPILE_CACHE=0 \
+    VLLM_USE_FLASHINFER_SAMPLER=0 \
+    VLLM_LOGGING_LEVEL=WARNING \
+    TORCHINDUCTOR_FX_GRAPH_CACHE=1 \
+    CUDA_DEVICE_MAX_CONNECTIONS=16 \
+    OMP_NUM_THREADS=4 \
+    NVIDIA_TF32_OVERRIDE=1 \
+    PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
+RUN sed -i 's#__HERE__#/app#g' /app/config/sophon_realtime_flash_4b.yaml \
+    && sed -i 's#__HERE__#/app#g' /app/config/sophon_realtime_flash_4b_orin.yaml \
+    && /opt/venv/bin/python3 -c "import importlib.util, pathlib; \
+spec = importlib.util.find_spec('humming.utils.device'); \
+exec('''import humming.utils.device as d\np = pathlib.Path(d.__file__)\ns = p.read_text()\ns = s.replace('        if (major, minor) == (12, 1):', '        if (major, minor) == (8, 7):\\\\n            return 204.8\\\\n        if (major, minor) == (12, 1):', 1)\ns = s.replace('        max_clock_mhz = pynvml.nvmlDeviceGetMaxClockInfo(handle, pynvml.NVML_CLOCK_SM)', '        try:\\\\n            max_clock_mhz = pynvml.nvmlDeviceGetMaxClockInfo(handle, pynvml.NVML_CLOCK_SM)\\\\n        except pynvml.NVMLError:\\\\n            max_clock_mhz = 1300', 1)\np.write_text(s)''') if spec else print('no humming')"
+
+WORKDIR /app
+EXPOSE 18009
+ENTRYPOINT []
+CMD ["python3", "-m", "uvicorn", "server:app", "--host", "0.0.0.0", "--port", "18009", "--workers", "1"]
