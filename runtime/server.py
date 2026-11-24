@@ -53,8 +53,9 @@ def _is_orin_gpu() -> bool:
         return False
 
 
-def _resolve_deploy_config() -> str:
-    explicit = os.environ.get("SOPHON_DEPLOY_CONFIG")
+def _resolve_deploy_config(env: dict | None = None) -> str:
+    src_env = env if env is not None else os.environ
+    explicit = src_env.get("SOPHON_DEPLOY_CONFIG")
     if explicit:
         return explicit
     if _is_orin_gpu() and os.path.isfile(ORIN_DEPLOY_CONFIG):
@@ -62,7 +63,46 @@ def _resolve_deploy_config() -> str:
     return DEPLOY_CONFIG
 
 
-def _build_vllm_cmd():
+def _setup_thor_optimizations(env: dict) -> None:
+    """Install Thor-only runtime acceleration hooks and tuned deploy config. Never called on Orin."""
+    patch_dir = "/tmp/thor_patch"
+    os.makedirs(patch_dir, exist_ok=True)
+    patch_src = globals().get("_THOR_PATCH_SRC", "")
+    if not patch_src:
+        local_patch = os.path.join(os.path.dirname(os.path.abspath(__file__)), "thor_patch.py")
+        if os.path.isfile(local_patch):
+            with open(local_patch, "r", encoding="utf-8") as fh:
+                patch_src = fh.read()
+    if patch_src:
+        with open(os.path.join(patch_dir, "sitecustomize.py"), "w", encoding="utf-8") as fh:
+            fh.write(patch_src)
+        py_path = env.get("PYTHONPATH", "")
+        parts = [p for p in py_path.split(":") if p]
+        if patch_dir not in parts:
+            env["PYTHONPATH"] = f"{patch_dir}:{py_path}" if py_path else patch_dir
+    yaml_src = globals().get("_THOR_DEPLOY_YAML", "")
+    if yaml_src and not env.get("SOPHON_DEPLOY_CONFIG"):
+        yaml_path = os.path.join(patch_dir, "sophon_realtime_flash_4b_thor.yaml")
+        with open(yaml_path, "w", encoding="utf-8") as fh:
+            fh.write(yaml_src)
+        env["SOPHON_DEPLOY_CONFIG"] = yaml_path
+    env.setdefault("VLLM_DISABLE_COMPILE_CACHE", "0")
+    env.setdefault("TORCHINDUCTOR_CACHE_DIR", "/cache/inductor")
+    env.setdefault("TORCHINDUCTOR_FX_GRAPH_CACHE", "1")
+    env.setdefault("SOPHON_MPS", "1")
+    env.setdefault("SOPHON_THOR_BF16_LINEAR_MARLIN", "w4_g64")
+    env.setdefault("SOPHON_THOR_TALKER_MARLIN", "w8")
+    env.setdefault("SOPHON_THOR_CP_MARLIN", "w4_g64")
+    env.setdefault("SOPHON_THOR_CP_RMSNORM", "1")
+    env.setdefault("SOPHON_THOR_CP_KVCACHE", "1")
+    env.setdefault("SOPHON_THOR_CP_TRITON_ATTN", "1")
+    env.setdefault("OMP_NUM_THREADS", "4")
+    env.setdefault("NVIDIA_TF32_OVERRIDE", "1")
+    env.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
+    env.setdefault("VLLM_LOGGING_LEVEL", "WARNING")
+
+
+def _build_vllm_cmd(env: dict | None = None):
     cmd = [
         "vllm", "serve", MODEL_DIR,
         "--omni",
@@ -71,7 +111,7 @@ def _build_vllm_cmd():
         "--trust-remote-code",
         "--init-timeout", "3000",
         "--stage-init-timeout", "3000",
-        "--deploy-config", _resolve_deploy_config(),
+        "--deploy-config", _resolve_deploy_config(env),
     ]
     if os.environ.get("SOPHON_NSYS_PROFILE") == "1":
         nsys_bin = os.environ.get("SOPHON_NSYS_BIN", "/opt/nsight/target-linux-sbsa-armv8/nsys")
@@ -96,9 +136,13 @@ async def lifespan(app: FastAPI):
     env.setdefault("SOPHON_MODEL", MODEL_DIR)
     env.setdefault("SOPHON_PORT", str(VLLM_PORT))
     env.setdefault("SOPHON_BRIDGE_PORT", str(VLLM_PORT + 700))
-    env.setdefault("VLLM_DISABLE_COMPILE_CACHE", "1")
     env.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
-    if os.environ.get("SOPHON_MPS", "0") == "1" and os.path.exists("/usr/bin/nvidia-cuda-mps-control"):
+    orin = _is_orin_gpu()
+    if not orin:
+        _setup_thor_optimizations(env)
+    else:
+        env.setdefault("VLLM_DISABLE_COMPILE_CACHE", "1")
+    if env.get("SOPHON_MPS", "0") == "1" and os.path.exists("/usr/bin/nvidia-cuda-mps-control"):
         pipe_dir = "/tmp/nvidia-mps/pipe"
         log_dir = "/tmp/nvidia-mps/log"
         os.makedirs(pipe_dir, exist_ok=True)
@@ -106,7 +150,7 @@ async def lifespan(app: FastAPI):
         env["CUDA_MPS_PIPE_DIRECTORY"] = pipe_dir
         env["CUDA_MPS_LOG_DIRECTORY"] = log_dir
         subprocess.run(["/usr/bin/nvidia-cuda-mps-control", "-d"], env=env, check=False)
-    if _is_orin_gpu():
+    if orin:
         env.pop("PYTORCH_CUDA_ALLOC_CONF", None)
         env.pop("NVIDIA_TF32_OVERRIDE", None)
         env["OMP_NUM_THREADS"] = os.environ.get("ORIN_OMP_NUM_THREADS", "2")
@@ -117,7 +161,7 @@ async def lifespan(app: FastAPI):
         if cu13_lib not in ld_path.split(":"):
             env["LD_LIBRARY_PATH"] = f"{cu13_lib}:{ld_path}" if ld_path else cu13_lib
 
-    app.state.vllm_proc = subprocess.Popen(_build_vllm_cmd(), env=env)
+    app.state.vllm_proc = subprocess.Popen(_build_vllm_cmd(env), env=env)
     app.state.client = httpx.AsyncClient(
         base_url=f"http://127.0.0.1:{VLLM_PORT}",
         timeout=httpx.Timeout(300.0, connect=5.0),

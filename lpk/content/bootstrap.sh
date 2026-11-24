@@ -1,10 +1,10 @@
 #!/bin/sh
 set -eu
 # Fixed, anonymously verified controller delivery. Model downloads belong to Host.
-BUNDLE_SHA='8ebffd53cd6e19d3df44441dbdff88ec8a4d21c0659d332d232d6d6d1ec995bc'
-BUNDLE_SIZE='35927797'
-MS_URL='https://modelscope.cn/models/manateelazycat/Sophon-Realtime-4B-Flash-AIPod/resolve/49a8fae806883409b1b8aae502a67cc89afb1066/control/sophon-realtime-4b-control-0.1.0.tar.gz'
-HF_URL='https://huggingface.co/manateelazycat/Sophon-Realtime-4B-Flash-AIPod-HF/resolve/af4139f49e083aa1765a841b8c08f6a6cc966e30/control/sophon-realtime-4b-control-0.1.0.tar.gz'
+BUNDLE_SHA='dd98acde1dc337f8b7a9e7611f07821dabf20a3071c08060ecf2223d72edea59'
+BUNDLE_SIZE='35939357'
+MS_URL='https://modelscope.cn/models/manateelazycat/Sophon-Realtime-4B-Flash-AIPod/resolve/754c34cf8d72093dc410bad49ec843b804711629/control/sophon-realtime-4b-control-0.1.1.tar.gz'
+HF_URL='https://huggingface.co/manateelazycat/Sophon-Realtime-4B-Flash-AIPod-HF/resolve/918a8b7a555480bb39e5278b8309d08894ffb4af/control/sophon-realtime-4b-control-0.1.1.tar.gz'
 DATA_ROOT="${SOPHON_REALTIME_DATA_DIR:-/lzcapp/var/sophon-realtime-4b}"
 CACHE="$DATA_ROOT/control-plane"
 ROOT="$CACHE/$BUNDLE_SHA"
