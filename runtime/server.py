@@ -63,8 +63,8 @@ def _resolve_deploy_config(env: dict | None = None) -> str:
     return DEPLOY_CONFIG
 
 
-def _setup_thor_optimizations(env: dict) -> None:
-    """Install Thor-only runtime acceleration hooks and tuned deploy config. Never called on Orin."""
+def _setup_thor_optimizations(env: dict, orin: bool = False) -> None:
+    """Install runtime acceleration hooks and tuned deploy config for Thor and Orin."""
     patch_dir = "/tmp/thor_patch"
     os.makedirs(patch_dir, exist_ok=True)
     patch_src = globals().get("_THOR_PATCH_SRC", "")
@@ -80,9 +80,10 @@ def _setup_thor_optimizations(env: dict) -> None:
         parts = [p for p in py_path.split(":") if p]
         if patch_dir not in parts:
             env["PYTHONPATH"] = f"{patch_dir}:{py_path}" if py_path else patch_dir
-    yaml_src = globals().get("_THOR_DEPLOY_YAML", "")
+    yaml_src = globals().get("_ORIN_DEPLOY_YAML" if orin else "_THOR_DEPLOY_YAML", "")
     if yaml_src and not env.get("SOPHON_DEPLOY_CONFIG"):
-        yaml_path = os.path.join(patch_dir, "sophon_realtime_flash_4b_thor.yaml")
+        yaml_name = "sophon_realtime_flash_4b_orin.yaml" if orin else "sophon_realtime_flash_4b_thor.yaml"
+        yaml_path = os.path.join(patch_dir, yaml_name)
         with open(yaml_path, "w", encoding="utf-8") as fh:
             fh.write(yaml_src)
         env["SOPHON_DEPLOY_CONFIG"] = yaml_path
@@ -91,11 +92,16 @@ def _setup_thor_optimizations(env: dict) -> None:
     env.setdefault("TORCHINDUCTOR_FX_GRAPH_CACHE", "1")
     env.setdefault("SOPHON_MPS", "1")
     env.setdefault("SOPHON_THOR_BF16_LINEAR_MARLIN", "w4_g64")
-    env.setdefault("SOPHON_THOR_TALKER_MARLIN", "w8")
+    env.setdefault("SOPHON_THOR_TALKER_MARLIN", "w4_g64" if orin else "w8")
     env.setdefault("SOPHON_THOR_CP_MARLIN", "w4_g64")
     env.setdefault("SOPHON_THOR_CP_RMSNORM", "1")
     env.setdefault("SOPHON_THOR_CP_KVCACHE", "1")
     env.setdefault("SOPHON_THOR_CP_TRITON_ATTN", "1")
+    if orin:
+        env.setdefault("SOPHON_THOR_CP_HEAD_W8", "1")
+        env.setdefault("SOPHON_THOR_FLOW_SKIP_ZERO_CFG", "1")
+        env.setdefault("SOPHON_THOR_FLOW_BF16", "1")
+        env.setdefault("SOPHON_THOR_FLOW_CG", "0")
     env.setdefault("OMP_NUM_THREADS", "4")
     env.setdefault("NVIDIA_TF32_OVERRIDE", "1")
     env.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
@@ -138,10 +144,7 @@ async def lifespan(app: FastAPI):
     env.setdefault("SOPHON_BRIDGE_PORT", str(VLLM_PORT + 700))
     env.setdefault("VLLM_USE_FLASHINFER_SAMPLER", "0")
     orin = _is_orin_gpu()
-    if not orin:
-        _setup_thor_optimizations(env)
-    else:
-        env.setdefault("VLLM_DISABLE_COMPILE_CACHE", "1")
+    _setup_thor_optimizations(env, orin=orin)
     if env.get("SOPHON_MPS", "0") == "1" and os.path.exists("/usr/bin/nvidia-cuda-mps-control"):
         pipe_dir = "/tmp/nvidia-mps/pipe"
         log_dir = "/tmp/nvidia-mps/log"
